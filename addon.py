@@ -55,16 +55,12 @@ addonname   = addon.getAddonInfo('name')
 capture = xbmc.RenderCapture()
 capture.capture(32, 32, xbmc.CAPTURE_FLAG_CONTINUOUS)
 
-host = "192.168.1.219" #get_bulb_ip()
+host = get_bulb_ip()
 port = 56700
-
-
 
 s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 s.connect((host, port))
-
-## Close socket
 
 while not xbmc.abortRequested:
 	xbmc.sleep(100)
