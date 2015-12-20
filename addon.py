@@ -112,5 +112,3 @@ while not xbmc.abortRequested:
 			print "Caught exception socket.error"
 
 s.close()
-
-		#xbmcgui.Dialog().ok(addonname, str(sum(red)/len(red)), str(sum(green)/len(green)), str(sum(blue)/len(blue)))
