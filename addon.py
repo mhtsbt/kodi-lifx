@@ -11,6 +11,8 @@ import struct
 
 from binascii import unhexlify
 
+addon = xbmcaddon.Addon();
+
 def long_to_bytes (val):
    
     val = long(val);  
@@ -44,10 +46,11 @@ def get_bulb_ip ():
 		deviceIp = addr[0];
 
 	listener.close();
-	sender.close();
 
 	return addr[0];
 
+refreshRate = int(addon.getSetting("refreshRate"));
+min_brightness = int(addon.getSetting("minbrightness"))*655;
 
 useLegacyApi   = True
 capture = xbmc.RenderCapture()
@@ -73,7 +76,7 @@ class PlayerMonitor( xbmc.Player ):
 
 
 while not xbmc.abortRequested:
-	xbmc.sleep(100)
+	xbmc.sleep(refreshRate)
 	if capture.getCaptureState() == xbmc.CAPTURE_STATE_DONE:
 		width = capture.getWidth();
 		height = capture.getHeight();
@@ -107,7 +110,12 @@ while not xbmc.abortRequested:
 		satvalue = int(hsb[1]*65535);
 		satvalueHex = long_to_bytes(satvalue);
 		brightnessvalue = int(hsb[2]*65535);
-		brightnessvalueHex = long_to_bytes(brightnessvalue);
+
+		if brightnessvalue > min_brightness:
+			brightnessvalueHex = long_to_bytes(brightnessvalue);
+		else:
+			brightnessvalueHex = long_to_bytes(min_brightness);
+
 
 		packetArray = bytearray([0x31,0x00,0x00,0x34,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x66,0x00,0x00,0x00,0x00,0x55,0x55,0xFF,0xFF,0xFF,0xFF,0xAC,0x0D,0x00,0x00,0x00,0x00])
 
