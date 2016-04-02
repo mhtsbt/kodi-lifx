@@ -12,7 +12,6 @@ import struct
 from binascii import unhexlify
 
 addon = xbmcaddon.Addon();
-
 def long_to_bytes (val):
    
     val = long(val);  
@@ -23,29 +22,23 @@ def long_to_bytes (val):
 
 def get_bulb_ip (): 
 
-	sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
-	sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-	sender.connect(('255.255.255.255', 56700));
-
-	listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
-	listener.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-	listener.bind(('',56700));
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+	s.bind(('', 56700))
 
 	ownIp = socket.gethostbyname(socket.gethostname());
 
 	packetArray = bytearray([0x24, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x65, 0x00, 0x00, 0x00])
 
-	sender.send(packetArray);
-
-	sender.close();
+	s.sendto(packetArray,('255.255.255.255', 56700));
 
 	deviceIp = ownIp;
 
 	while deviceIp == ownIp:
-		data, addr =listener.recvfrom(2048);
+		data, addr =s.recvfrom(2048);
 		deviceIp = addr[0];
-
-	listener.close();
+		s.close();
 
 	return addr[0];
 
@@ -72,7 +65,6 @@ class PlayerMonitor( xbmc.Player ):
 	def onPlayBackStarted( self ):
 		if not useLegacyApi:
 			capture.capture(32, 32)
-
 
 
 while not xbmc.abortRequested:
