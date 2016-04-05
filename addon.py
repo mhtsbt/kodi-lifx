@@ -20,7 +20,9 @@ def long_to_bytes (val):
     val = ''.join( [ "%02X" % ord( x ) for x in val ] ).strip();
     return val[12:16]
 
-def get_bulb_ip (): 
+def get_bulb_ip (bulbCount): 
+
+	devices = []
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -31,17 +33,30 @@ def get_bulb_ip ():
 
 	packetArray = bytearray([0x24, 0x00, 0x00, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x65, 0x00, 0x00, 0x00])
 
-	s.sendto(packetArray,('255.255.255.255', 56700));
+	for x in range(0, 10):
+		s.sendto(packetArray,('255.255.255.255', 56700));
 
-	deviceIp = ownIp;
+	deviceCount = 0;
 
-	while deviceIp == ownIp:
+	while (deviceCount < bulbCount):
 		data, addr =s.recvfrom(2048);
 		deviceIp = addr[0];
-		s.close();
+		if (deviceIp <> ownIp and deviceIp not in devices):
+			devices.append(deviceIp)
+			deviceCount += 1
+			print deviceIp
 
-	return addr[0];
+	s.close();
 
+	return devices;
+
+def send_to_devices (socket,hosts,message):
+
+	for host in hosts:
+		socket.sendto(message,(host, 56700));
+
+
+bulbCount = int(addon.getSetting("bulbCount"));
 refreshRate = int(addon.getSetting("refreshRate"));
 min_brightness = int(addon.getSetting("minbrightness"))*655;
 
@@ -51,12 +66,10 @@ capture = xbmc.RenderCapture()
 if useLegacyApi:
 	capture.capture(32, 32, xbmc.CAPTURE_FLAG_CONTINUOUS)
 
-host = get_bulb_ip()
-port = 56700
+hosts = get_bulb_ip(2)
 
 s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-s.connect((host, port))
 
 class PlayerMonitor( xbmc.Player ):
 	def __init__( self, *args, **kwargs ):
@@ -120,8 +133,8 @@ while not xbmc.abortRequested:
 		packetArray[43] = unhexlify(brightnessvalueHex[0:2]);
 		packetArray[42] = unhexlify(brightnessvalueHex[2:4]);
 
-		try:
-			s.send(packetArray);
+		try:			
+			send_to_devices(s,hosts,packetArray)
 		except:
 			print "Caught exception socket.error"
 

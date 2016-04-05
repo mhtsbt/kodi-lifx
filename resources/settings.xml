@@ -2,6 +2,7 @@
 <settings>
     <category label="32001">
         <setting label="30000" type="slider" id="refreshrate" default="200" range="100,100,2000" option="int" />
-         <setting label="30001" type="slider" id="minbrightness" default="0" range="0,10,100" option="int" />
+        <setting label="30001" type="slider" id="minbrightness" default="0" range="0,10,100" option="int" />
+        <setting label="30002" type="number" id="bulbCount" default="1" />
     </category>  
 </settings>
