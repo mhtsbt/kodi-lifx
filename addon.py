@@ -56,8 +56,8 @@ def send_to_devices (socket,hosts,message):
 		socket.sendto(message,(host, 56700));
 
 
-bulbCount = int(addon.getSetting("bulbCount"));
-refreshRate = int(addon.getSetting("refreshRate"));
+bulbCount = int(addon.getSetting("bulbcount"));
+refreshRate = int(addon.getSetting("refreshrate"));
 min_brightness = int(addon.getSetting("minbrightness"))*655;
 
 useLegacyApi   = True
